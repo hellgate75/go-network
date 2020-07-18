@@ -43,7 +43,7 @@ type ServerConfigBuilder interface {
 	// Add more Curve Ids to the current TLS Curve Preferences, adding to the preset values : tls.CurveP521, tls.CurveP384,
 	// tls.CurveP256
 	MoreCurvePreferences(curve tls.CurveID) ServerConfigBuilder
-	// Set preference for Server Size Cipher Suite
+	// Set preference for Server Cipher Suite
 	WithPreferServerCipherSuites(preferServerCipherSuites bool)  ServerConfigBuilder
 	// Build the model.ServerConfig and report any error occurred during the build process
 	Build() (model.ServerConfig, error)

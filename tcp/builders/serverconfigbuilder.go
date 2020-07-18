@@ -5,54 +5,62 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"github.com/hellgate75/go-network/model"
+	"github.com/hellgate75/go-network/model/encoding"
 	"golang.org/x/crypto/acme/autocert"
 	"io/ioutil"
 )
 
-// Helper for building a model.ClientConfig instance
-type ClientConfigBuilder interface {
+// Helper for building a model.ServerConfig instance
+type TcpServerConfigBuilder interface {
+	// Use Tls encryption over standard plain communication protocol
+	UseTlsEncryption(use bool) TcpServerConfigBuilder
+	// Associate a custom network than the default 'tcp' one
+	WithNetwork(network string) TcpServerConfigBuilder
+	// Associate a custom encoding than the default jason format -> responding to 'application/json' Mime type
+	WithEncoding(enc encoding.Encoding) TcpServerConfigBuilder
 	// Associate an host and a port to the builder workflow
-	WithHost(protocol, address string, port int) ClientConfigBuilder
-	// Associate certificate and key files full name to the builder workflow
-	WithTLSCerts(certificate string, key string) ClientConfigBuilder
+	WithHost(address string, port int) TcpServerConfigBuilder
+	// Add a certificate files to the certificate list to the builder workflow
+	WithTLSCerts(certificate string, key string) TcpServerConfigBuilder
 	// Add some more certificate files to the certificate list to the builder workflow
-	// If no certificate is settled up first call with associate the main TLS certificate files
-	MoreTLSCerts(certificate string, key string) ClientConfigBuilder
+	MoreTLSCerts(certificate string, key string) TcpServerConfigBuilder
 	// Add one root CA certificate files to the certificate list to the builder workflow
-	WithRootCaCert(certificate string) ClientConfigBuilder
+	WithRootCaCert(certificate string) TcpServerConfigBuilder
 	// Add one client CA certificate files to the certificate list to the builder workflow
-	WithClientCaCert(certificate string) ClientConfigBuilder
+	WithClientCaCert(certificate string) TcpServerConfigBuilder
 	// Set up the certificate manager for the auto-scan of certificates for a folder
-	WithCertificateManager(dir string) ClientConfigBuilder
+	WithCertificateManager(dir string) TcpServerConfigBuilder
 	// Add more root CA certificate files to the certificate list to the builder workflow
-	MoreClientCaCerts(certificate string) ClientConfigBuilder
+	MoreClientCaCerts(certificate string) TcpServerConfigBuilder
 	// Add more client CA certificate files to the certificate list to the builder workflow
-	MoreRootCaCerts(certificate string) ClientConfigBuilder
+	MoreRootCaCerts(certificate string) TcpServerConfigBuilder
 	// Set min version different from tls.VersionTLS12
-	WithMinVersion(min uint16) ClientConfigBuilder
+	WithMinVersion(min uint16) TcpServerConfigBuilder
 	// Set the insecure skip verify flag, by default it's false
-	WithInsecureSkipVerify(insecure bool) ClientConfigBuilder
+	WithInsecureSkipVerify(insecure bool) TcpServerConfigBuilder
 	// Set up renegotiation, by default it's sett up to: tls.RenegotiateNever
-	WithRenegotiationSupport(renegotiation tls.RenegotiationSupport) ClientConfigBuilder
+	WithRenegotiationSupport(renegotiation tls.RenegotiationSupport) TcpServerConfigBuilder
 	// Set up the Client Session Cache manager (suggested: tls.NewLRUClientSessionCache(1024) or more ...)
-	WithClientSessionCache(cache tls.ClientSessionCache) ClientConfigBuilder
+	WithClientSessionCache(cache tls.ClientSessionCache) TcpServerConfigBuilder
 	// Add more Cipher suites to the preset values : tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
 	// tls.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA, tls.TLS_RSA_WITH_AES_256_GCM_SHA384,
 	// tls.TLS_RSA_WITH_AES_256_CBC_SHA
-	MoreCipherSuites(cipherSuite uint16) ClientConfigBuilder
+	MoreCipherSuites(cipherSuite uint16) TcpServerConfigBuilder
 	// Add more Curve Ids to the current TLS Curve Preferences, adding to the preset values : tls.CurveP521, tls.CurveP384,
 	// tls.CurveP256
-	MoreCurvePreferences(curve tls.CurveID) ClientConfigBuilder
+	MoreCurvePreferences(curve tls.CurveID) TcpServerConfigBuilder
 	// Set preference for Server Size Cipher Suite
-	WithPreferServerCipherSuites(preferServerCipherSuites bool)  ClientConfigBuilder
-	// Build the model.ClientConfig and report any error occurred during the build process
-	Build() (model.ClientConfig, error)
+	WithPreferServerCipherSuites(preferServerCipherSuites bool) TcpServerConfigBuilder
+	// Build the model.ServerConfig and report any error occurred during the build process
+	Build() (model.TcpServerConfig, error)
 }
 
-type clientConfigBuilder struct{
-	protocol	 				string
+type serverConfigBuilder struct{
+	useTls					 	bool
 	address      				string
 	port         				int
+	network  					string
+	enc							encoding.Encoding
 	caPool       				*x509.CertPool
 	rootCaPool   				*x509.CertPool
 	certificates 				[]tls.Certificate
@@ -66,14 +74,28 @@ type clientConfigBuilder struct{
 	preferServerCipherSuites 	bool
 }
 
-func (b *clientConfigBuilder) WithHost(protocol, address string, port int) ClientConfigBuilder {
-	b.protocol = protocol
+func (b *serverConfigBuilder) UseTlsEncryption(use bool) TcpServerConfigBuilder {
+	b.useTls = use
+	return b
+}
+
+func (b *serverConfigBuilder) WithNetwork(network string) TcpServerConfigBuilder {
+	b.network = network
+	return b
+}
+
+func (b *serverConfigBuilder) WithHost(address string, port int) TcpServerConfigBuilder {
 	b.address = address
 	b.port = port
 	return b
 }
 
-func (b *clientConfigBuilder) WithTLSCerts(certificate string, key string) ClientConfigBuilder {
+func (b *serverConfigBuilder) WithEncoding(enc encoding.Encoding) TcpServerConfigBuilder {
+	b.enc=enc
+	return b
+}
+
+func (b *serverConfigBuilder) WithTLSCerts(certificate string, key string) TcpServerConfigBuilder {
 	cert, err := tls.LoadX509KeyPair(certificate, key)
 	if err == nil {
 		b.certificates = append(b.certificates, cert)
@@ -81,7 +103,7 @@ func (b *clientConfigBuilder) WithTLSCerts(certificate string, key string) Clien
 	return b
 }
 
-func (b *clientConfigBuilder) MoreTLSCerts(certificate string, key string) ClientConfigBuilder {
+func (b *serverConfigBuilder) MoreTLSCerts(certificate string, key string) TcpServerConfigBuilder {
 	cert, err := tls.LoadX509KeyPair(certificate, key)
 	if err == nil {
 		b.certificates = append(b.certificates, cert)
@@ -89,7 +111,7 @@ func (b *clientConfigBuilder) MoreTLSCerts(certificate string, key string) Clien
 	return b
 }
 
-func (b *clientConfigBuilder) WithRootCaCert(certificate string) ClientConfigBuilder {
+func (b *serverConfigBuilder) WithRootCaCert(certificate string) TcpServerConfigBuilder {
 	caCert, err := ioutil.ReadFile(certificate)
 	if err != nil {
 		if b.rootCaPool == nil {
@@ -100,7 +122,7 @@ func (b *clientConfigBuilder) WithRootCaCert(certificate string) ClientConfigBui
 	return b
 }
 
-func (b *clientConfigBuilder) WithClientCaCert(certificate string) ClientConfigBuilder {
+func (b *serverConfigBuilder) WithClientCaCert(certificate string) TcpServerConfigBuilder {
 	caCert, err := ioutil.ReadFile(certificate)
 	if err != nil {
 		if b.caPool == nil {
@@ -111,7 +133,7 @@ func (b *clientConfigBuilder) WithClientCaCert(certificate string) ClientConfigB
 	return b
 }
 
-func (b *clientConfigBuilder) MoreClientCaCerts(certificate string) ClientConfigBuilder {
+func (b *serverConfigBuilder) MoreClientCaCerts(certificate string) TcpServerConfigBuilder {
 	caCert, err := ioutil.ReadFile(certificate)
 	if err != nil {
 		if b.caPool == nil {
@@ -122,7 +144,7 @@ func (b *clientConfigBuilder) MoreClientCaCerts(certificate string) ClientConfig
 	return b
 }
 
-func (b *clientConfigBuilder) MoreRootCaCerts(certificate string) ClientConfigBuilder {
+func (b *serverConfigBuilder) MoreRootCaCerts(certificate string) TcpServerConfigBuilder {
 	caCert, err := ioutil.ReadFile(certificate)
 	if err != nil {
 		if b.rootCaPool == nil {
@@ -133,7 +155,7 @@ func (b *clientConfigBuilder) MoreRootCaCerts(certificate string) ClientConfigBu
 	return b
 }
 
-func (b *clientConfigBuilder) WithCertificateManager(dir string) ClientConfigBuilder {
+func (b *serverConfigBuilder) WithCertificateManager(dir string) TcpServerConfigBuilder {
 	b.certManager = &autocert.Manager{
 		Prompt: autocert.AcceptTOS,
 		Cache: autocert.DirCache(dir),
@@ -141,52 +163,50 @@ func (b *clientConfigBuilder) WithCertificateManager(dir string) ClientConfigBui
 	return b
 }
 
-func (b *clientConfigBuilder) WithMinVersion(min uint16) ClientConfigBuilder {
+func (b *serverConfigBuilder) WithMinVersion(min uint16) TcpServerConfigBuilder {
 	b.minVersion = min
 	return b
 }
 
-func (b *clientConfigBuilder) WithInsecureSkipVerify(insecure bool) ClientConfigBuilder {
+func (b *serverConfigBuilder) WithInsecureSkipVerify(insecure bool) TcpServerConfigBuilder {
 	b.insecure = insecure
 	return b
 }
 
-func (b *clientConfigBuilder) WithRenegotiationSupport(renegotiation tls.RenegotiationSupport) ClientConfigBuilder {
+func (b *serverConfigBuilder) WithRenegotiationSupport(renegotiation tls.RenegotiationSupport) TcpServerConfigBuilder {
 	b.renegotiation = renegotiation
 	return b
 }
 
-func (b *clientConfigBuilder) WithClientSessionCache(cache tls.ClientSessionCache) ClientConfigBuilder {
+func (b *serverConfigBuilder) WithClientSessionCache(cache tls.ClientSessionCache) TcpServerConfigBuilder {
 	b.cache = cache
 	return b
 }
 
-func (b *clientConfigBuilder) MoreCipherSuites(cipherSuite uint16) ClientConfigBuilder {
+func (b *serverConfigBuilder) MoreCipherSuites(cipherSuite uint16) TcpServerConfigBuilder {
 	b.cipherSuits = append(b.cipherSuits, cipherSuite)
 	return b
 }
 
-func (b *clientConfigBuilder) WithPreferServerCipherSuites(preferServerCipherSuites bool)  ClientConfigBuilder {
-	b.preferServerCipherSuites = preferServerCipherSuites
-	return b
-}
-
-func (b *clientConfigBuilder) MoreCurvePreferences(curve tls.CurveID) ClientConfigBuilder {
+func (b *serverConfigBuilder) MoreCurvePreferences(curve tls.CurveID) TcpServerConfigBuilder {
 	b.curvePref = append(b.curvePref, curve)
 	return b
 }
 
-func (b *clientConfigBuilder) Build() (model.ClientConfig, error) {
+func (b *serverConfigBuilder) WithPreferServerCipherSuites(preferServerCipherSuites bool) TcpServerConfigBuilder {
+	b.preferServerCipherSuites = preferServerCipherSuites
+	return b
+}
+
+func (b *serverConfigBuilder) Build() (model.TcpServerConfig, error) {
 	var err error
 	var getCert func(info *tls.ClientHelloInfo) (*tls.Certificate, error)
 	if b.certManager != nil {
 		getCert = b.certManager.GetCertificate
 	}
-	return model.ClientConfig{
-		Host: b.address,
-		Port: b.port,
-		Protocol: b.protocol,
-		Config: &tls.Config{
+	var tlsConfig *tls.Config
+	if b.useTls {
+		tlsConfig = &tls.Config{
 			ClientCAs: b.caPool,
 			Certificates: b.certificates,
 			CipherSuites: b.cipherSuits,
@@ -199,12 +219,21 @@ func (b *clientConfigBuilder) Build() (model.ClientConfig, error) {
 			ClientSessionCache: b.cache,
 			Rand: rand.Reader,
 			Renegotiation: b.renegotiation,
-		},
+		}
+	}
+	return model.TcpServerConfig{
+		Host: b.address,
+		Port: b.port,
+		Encoding: b.enc,
+		Network: b.network,
+		Config: tlsConfig,
 	}, err
 }
 
-func NewClientConfigBuilder() ClientConfigBuilder{
-	return &clientConfigBuilder{
+func NewTcpServerConfigBuilder() TcpServerConfigBuilder {
+	return &serverConfigBuilder{
+		enc: encoding.EncodingJSONFormat,
+		network: "tcp",
 		certificates: make([]tls.Certificate, 0),
 		cipherSuits: []uint16{
 			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,

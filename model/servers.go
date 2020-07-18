@@ -5,37 +5,10 @@ import (
 	"encoding/hex"
 	"github.com/hellgate75/go-network/log"
 	"github.com/hellgate75/go-network/model/context"
+	"github.com/hellgate75/go-network/model/encoding"
+	"github.com/hellgate75/go-network/tcp/stream"
+	"net"
 	"net/http"
-)
-
-const (
-	//Rest Web Method: GET
-	REST_METHOD_GET RestMethod = http.MethodGet
-	//Rest Web Method: POST
-	REST_METHOD_POST RestMethod = http.MethodPost
-	//Rest Web Method: POST (FORM)
-	REST_METHOD_POST_FORM RestMethod = http.MethodPost + "_FORM"
-	//Rest Web Method: HEAD
-	REST_METHOD_HEAD RestMethod = http.MethodHead
-	//Rest Web Method: CONNECT
-	REST_METHOD_CONNECT RestMethod = http.MethodConnect
-	//Rest Web Method: DELETE
-	REST_METHOD_DELETE RestMethod = http.MethodDelete
-	//Rest Web Method: OPTIONS
-	REST_METHOD_OPTIONS RestMethod = http.MethodOptions
-	//Rest Web Method: PATCH
-	REST_METHOD_PATCH RestMethod = http.MethodPatch
-	//Rest Web Method: PUT
-	REST_METHOD_PUT RestMethod = http.MethodPut
-	//Rest Web Method: TRACE
-	REST_METHOD_TRACE RestMethod = http.MethodTrace
-	
-	//Rest Web Protocol: HTTP
-	REST_PROTOCOL_HTTP RestProtocol = "http"
-	//Rest Web Protocol: HTTPS
-	REST_PROTOCOL_HTTPS RestProtocol = "https"
-	//Rest Web Protocol: WS
-	REST_PROTOCOL_WS RestProtocol = "ws"
 )
 
 // Context Key Type
@@ -75,13 +48,7 @@ func SubmitFaiure(w http.ResponseWriter, statusCode int, message string) {
 	_, _ = w.Write([]byte(message))
 }
 
-// Rest Web Method  Type
-type RestMethod string
-
-// Rest Protocol Type
-type RestProtocol string
-
-// Defines an handler for an entire call
+// Defines an handler for all methods in a request
 type ApiCallHandler interface {
 	// Returns the list of managed Web Methods [GET, POST, PUT, DELETE, ...]
 	Methods() []string
@@ -102,5 +69,34 @@ type ApiAction interface {
 	Do() error
 }
 
+// Describe execution function for API rest connections
 type ApiActionFunction func(context.ApiCallContext) error
 
+
+// Defines an handler for an multiple actionsin a request
+type TcpCallHandler interface {
+	// Returns the list of managed actions names
+	Names() []string
+	// Handle Request using net.Conn
+	HandleRequest(net.Conn, stream.ConnReaderWriterCloser)
+	// Returns the handler name
+	GetName() string
+	// Set reference to server map or leave map nil, if not used
+	SetServerMap(m *map[string]interface{})
+	// Set the server logger
+	SetLogger(logger log.Logger)
+	// Set encoding used by the server
+	SetEncoding(enc encoding.Encoding)
+}
+
+// Interface that describes the callback action of an Tcp request
+type TcpAction interface {
+	GetName() string
+	// Execute Tcp command with API given arguments
+	With(context.TcpContext) TcpAction
+	Do() error
+}
+
+
+// Describe execution function for tcp connections
+type TcpActionFunction func(context.TcpContext) error

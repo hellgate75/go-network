@@ -13,7 +13,6 @@ import (
 	"io/ioutil"
 	log2 "log"
 	"net/http"
-	"os"
 )
 
 func sampleStruct() interface{} {
@@ -42,7 +41,7 @@ func emptyStruct() interface{} {
 
 
 func TestApiServer() {
-	apiServer := api.NewApiServer("sample", log.DEBUG)
+	apiServer := api.NewApiServer("Sample API", log.DEBUG)
 	serverConfig, err := builders.
 		NewServerConfigBuilder().
 		WithHost("", 9999).
@@ -109,18 +108,4 @@ func TestApiClient() {
 	fmt.Println("Response:", resp)
 	_ = io.Unmarshal(bts, encoding.EncodingJSONFormat, &empty)
 	fmt.Printf("Response data: %+v\n", empty)
-}
-
-func main() {
-	if len(os.Args) > 1 {
-		if os.Args[1] == "-client" {
-			TestApiClient()
-		} else if os.Args[1] == "-server" {
-			TestApiServer()
-		} else {
-			fmt.Printf("Unknwon argument: %s, accepted:  -client or -server\n", os.Args[1])
-		}
-	} else {
-		fmt.Println("Not enough arguments use -client or -server")
-	}
 }

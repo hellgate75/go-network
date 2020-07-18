@@ -40,7 +40,7 @@ type apiServer struct {
 
 func (server *apiServer) Init(config model.ServerConfig) (model.ApiServer, error) {
 	if server.running {
-		return server, errors.New(fmt.Sprint("Server is still running"))
+		return server, errors.New(fmt.Sprint("ApiServer.Init() - Server is still running"))
 	}
 	server.config = &config
 	return server, nil

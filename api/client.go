@@ -30,6 +30,9 @@ func (c *apiClient) Connect(config model.ClientConfig) error {
 }
 
 func (c *apiClient) Call(path string, method string, contentType *encoding.MimeType, accepts *encoding.MimeType, body io.Reader) (*http.Response, error) {
+	if c.cli == nil {
+		return nil, errors.New(fmt.Sprint("Client is not connected to a server socket"))
+	}
 	var err error
 	var out *http.Response
 	var r *http.Request
