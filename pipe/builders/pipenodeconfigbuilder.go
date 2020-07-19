@@ -15,6 +15,8 @@ import (
 type PipeNodeConfigBuilder interface {
 	// Use Tls encryption over standard plain communication protocol
 	UseTlsEncryption(use bool) PipeNodeConfigBuilder
+	// Associate a custom network than the default 'tcp' one
+	WithNetwork(network string) PipeNodeConfigBuilder
 	// Associate an inHost and a inPort to the builder workflow, setting-up or tear-sown input pipe node mode
 	WithInHost(address string, port int) PipeNodeConfigBuilder
 	// Associate an outHost and a outPort to the builder workflow, setting-up or tear-sown output pipe node mode
@@ -56,6 +58,7 @@ type PipeNodeConfigBuilder interface {
 
 type pipeNodeConfigBuilder struct{
 	useTls                   bool
+	network					 string
 	inAddress                string
 	inPort                   int
 	outAddress               string
@@ -78,6 +81,11 @@ func (b *pipeNodeConfigBuilder) UseTlsEncryption(use bool) PipeNodeConfigBuilder
 	b.useTls = use
 	return b
 }
+func (b *pipeNodeConfigBuilder) WithNetwork(network string) PipeNodeConfigBuilder{
+	b.network = network
+	return b
+}
+
 
 func containsAlpha(s string) bool {
 	pattern := `^w+$`
@@ -95,12 +103,13 @@ func isValidAddress(addr string) bool {
 			containsAlpha(addr)
 }
 
-func isValidPort(port int) bool {
-	return port > 0
+func isValidPort(port int, netwotk string) bool {
+	return port > 0 ||
+		(port == 0 && netwotk != "tcp" && netwotk != "udp")
 }
 
 func calculateInModeType(builder *pipeNodeConfigBuilder) {
-	if isValidAddress(builder.inAddress)  && isValidPort(builder.inPort) {
+	if isValidAddress(builder.inAddress)  && isValidPort(builder.inPort, builder.network) {
 		if builder.pipeType == model.OutputPipe {
 			builder.pipeType = model.InputOutputPipe
 		} else if builder.pipeType == model.NoTypeSelected {
@@ -116,7 +125,7 @@ func calculateInModeType(builder *pipeNodeConfigBuilder) {
 }
 
 func calculateOutModeType(builder *pipeNodeConfigBuilder) {
-	if isValidAddress(builder.outAddress)  && isValidPort(builder.outPort) {
+	if isValidAddress(builder.outAddress)  && isValidPort(builder.outPort, builder.network) {
 		if builder.pipeType == model.InputPipe {
 			builder.pipeType = model.InputOutputPipe
 		} else if builder.pipeType == model.NoTypeSelected {
@@ -272,6 +281,7 @@ func (b *pipeNodeConfigBuilder) Build() (model.PipeNodeConfig, error) {
 		}
 	}
 	return model.PipeNodeConfig{
+		Network: b.network,
 		InHost: b.inAddress,
 		InPort: b.inPort,
 		OutHost: b.outAddress,
@@ -283,6 +293,7 @@ func (b *pipeNodeConfigBuilder) Build() (model.PipeNodeConfig, error) {
 
 func NewPipeNodeConfigBuilder() PipeNodeConfigBuilder {
 	return &pipeNodeConfigBuilder{
+		network: "tcp",
 		pipeType: model.NoTypeSelected,
 		certificates: make([]tls.Certificate, 0),
 		cipherSuits: []uint16{

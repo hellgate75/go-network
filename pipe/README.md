@@ -17,9 +17,9 @@ Go Network Library
 
 ## Pipe library
 
-This module manages the Tcp Network Pipe Nodes (in available modes: Input, Output, Input/Output).
+This module manages the Network Pipe Nodes (in available modes: Input, Output, Input/Output).
 
-* [Model](/model/pipe.go) - Tcp Network Pipe Nodes model
+* [Model](/model/pipe.go) - Network Pipe Nodes model
 * [pipe.PipeNode](/pipe/pipenode.go) - Pipe Node Implementation
 * [pipe.builders.PipeNodeConfigBuilder](/pipe/builders/pipenodeconfigbuilder.go) - PipeNodeConfig Builder Component
 
@@ -27,7 +27,7 @@ This module manages the Tcp Network Pipe Nodes (in available modes: Input, Outpu
 
 ### Pipe Node modes
 
-Tcp Pipe Node component may be of three type:
+Network Pipe Node component may be of three type:
 
 * *InputPipe* - Reads data from a server and send data to a bytes array message channel
 * *OutputPipe* - Sends data to a client reading from a bytes array message channel
@@ -79,15 +79,15 @@ As first we create an instance of the PipeNode using the `pipe.NewPipeNode` func
 Then we create a configuration (the example doesn't require the SSL/TLS encryption, available in the library)
 using the fluent builder `pipe.builders.PipeNodeConfigBuilder`  available calling the function 
 `pipe.builders.NewPipeNodeConfigBuilder` (we can set In, Out or both Host options).
-In order to configure the TcpServer we invoke the component function `pipe.PipeNode.Init` passing the 
+In order to configure the PipeNode we invoke the component function `pipe.PipeNode.Init` passing the 
 node configuration. Now the node is ready to start. 
 
 Pipe Node is ready to start using the function `pipe.PipeNode.Start`. In order to make the main 
 thread waiting for the completion of the server activities we invocate at the end of the code the
-function `pipe.TcpServer.Wait`, instead to wait for the channels are ready for use you must invoke the
-function `pipe.TcpServer.UntilStarted`.
+function `pipe.PipeNode.Wait`, instead to wait for the channels are ready for use you must invoke the
+function `pipe.PipeNode.UntilStarted`.
 
-Reading data from the network is easy, just call function `pipe.TcpServer.GetInputPipeChannel` and use the
+Reading data from the network is easy, just call function `pipe.PipeNode.GetInputPipeChannel` and use the
 returned channel to read messages (model.PipeMessage === []byte). 
 Place the reading event, loop or anything matching with your desing, and enjoy the powerful library.
 
@@ -139,15 +139,15 @@ As first we create an instance of the PipeNode using the `pipe.NewPipeNode` func
 Then we create a configuration (the example doesn't require the SSL/TLS encryption, available in the library)
 using the fluent builder `pipe.builders.PipeNodeConfigBuilder`  available calling the function 
 `pipe.builders.NewPipeNodeConfigBuilder` (we can set In, Out or both Host options).
-In order to configure the TcpServer we invoke the component function `pipe.PipeNode.Init` passing the 
+In order to configure the PipeNode we invoke the component function `pipe.PipeNode.Init` passing the 
 node configuration. Now the node is ready to start. 
 
 Pipe Node is ready to start using the function `pipe.PipeNode.Start`. In order to make the main 
 thread waiting for the completion of the server activities we invocate at the end of the code the
-function `pipe.TcpServer.Wait`, instead to wait for the channels are ready for use you must invoke the
-function `pipe.TcpServer.UntilStarted`.
+function `pipe.PipeNode.Wait`, instead to wait for the channels are ready for use you must invoke the
+function `pipe.PipeNode.UntilStarted`.
 
-Reading data from the network is easy, just call function `pipe.TcpServer.GetOutputPipeChannel` and use the
+Reading data from the network is easy, just call function `pipe.PipeNode.GetOutputPipeChannel` and use the
 returned channel to send messages (model.PipeMessage === []byte) to the remote pipe node or tcp server. 
 Place the writer event, loop or anything matching with your desing, and enjoy the powerful library.
 

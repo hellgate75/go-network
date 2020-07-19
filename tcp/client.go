@@ -36,17 +36,21 @@ func (c *tcpClient) Connect(config model.TcpClientConfig) error {
 
 	}
 	c.config = &config
-	if c.config.Network == "" || c.config.Host == "" || c.config.Port == 0 {
-		c.logger.Error("Invalid network, server and/or port values")
+	if c.config.Network == "" {
+		c.logger.Error("Invalid network value")
 		return errors.New(fmt.Sprint("Invalid network, server and/or port values"))
 	}
-	addr := fmt.Sprintf("%s:%v", config.Host, config.Port)
+	address := fmt.Sprintf("%s:%v", c.config.Host, c.config.Port)
+	if c.config.Port <= 0 {
+		address = fmt.Sprintf("%s", c.config.Host)
+	}
+
 	if config.Config == nil {
 		// Plain connection
-		conn, err = net.Dial(config.Network, addr)
+		conn, err = net.Dial(config.Network, address)
 	} else {
 		// SSL/TLS Encryption
-		conn, err = tls.Dial(config.Network, addr, config.Config)
+		conn, err = tls.Dial(config.Network, address, config.Config)
 	}
 	if err == nil {
 		if c.config.Timeout > 0 {

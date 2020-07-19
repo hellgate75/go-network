@@ -43,6 +43,8 @@ type PipeNode interface {
 
 // Describe pine node properties
 type PipeNodeConfig struct {
+	// Connection network type (default: tcp)
+	Network		string
 	// Input Host name or ip address (eg. my-host.acme.com or 127,0,0,1 or empty or 0.0.0.0)
 	InHost 			string
 	// Input Pipe Node Port

@@ -64,6 +64,9 @@ func(server *tcpServer) Start() error {
 	server.internal = make(chan Signal)
 	server.commands = make(chan Signal)
 	var address = fmt.Sprintf("%s:%v", server.config.Host, server.config.Port)
+	if server.config.Port <= 0 {
+		address = fmt.Sprintf("%s", server.config.Host)
+	}
 	var l net.Listener
 	if server.config.Config != nil {
 		l, err = tls.Listen(server.config.Network, address, server.config.Config)

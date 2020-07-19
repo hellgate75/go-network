@@ -20,7 +20,7 @@ This library contains following modules.
 Packages:
 * [Api library](/api) - Api Rest server and client library
 * [Tcp library](/tcp) - Tcp server and client library
-* [Pipe library](/pipe) - Pipe Input, Output, Input/Output modes library
+* [Pipe library](/pipe) - Network Pipe Input, Output, Input/Output modes library
 
 
 ### Api library
@@ -51,10 +51,10 @@ This module manages the Tcp Server and client.
 
 ### Pipe library
 
-This module manages the Tcp Network Pipe Nodes (in available modes: Input, Output, Input/Output).
+This module manages the Network Pipe Nodes (in available modes: Input, Output, Input/Output).
 
-* [Model](/model/pipe.go) - Tcp Network Pipe Nodes model
-* [Pipe Node](/pipe/pipenode.go) - Pipe Node Implementation
+* [Model](/model/pipe.go) - Network Pipe Nodes model
+* [Pipe Node](/pipe/pipenode.go) - Network Pipe Node Implementation
 * [PipeNodeConfigBuilder](/pipe/builders/pipenodeconfigbuilder.go) - PipeNodeConfig Builder Component
 
 
