@@ -13,6 +13,7 @@ import (
 )
 
 type Signal byte
+
 const (
 	shutdown	Signal = iota + 1
 	purge
@@ -60,6 +61,8 @@ func(server *tcpServer) Start() error {
 		server.logger.Fatal("TcpServer.Start() - Error: No server configuration provided")
 		return errors.New(fmt.Sprint("TcpServer.Start() - Error: No server configuration provided"))
 	}
+	server.internal = make(chan Signal)
+	server.commands = make(chan Signal)
 	var address = fmt.Sprintf("%s:%v", server.config.Host, server.config.Port)
 	var l net.Listener
 	if server.config.Config != nil {
@@ -149,7 +152,6 @@ func (server *tcpServer) acceptClients() {
 	}
 }
 
-
 func (server *tcpServer) shutdownTimer() {
 	server.timer = time.NewTicker(5 * time.Second)
 	defer func() {
@@ -192,7 +194,9 @@ func (server *tcpServer) checkExit() bool {
 
 func (server *tcpServer) evacuate() {
 	close(server.internal)
+	server.internal = nil
 	close(server.commands)
+	server.commands = nil
 }
 
 func(server *tcpServer) Stop() error {
@@ -214,8 +218,8 @@ func(server *tcpServer) Stop() error {
 	if server.tcpListener != nil {
 		err := (*server.tcpListener).Close()
 		if err != nil {
-			server.logger.Errorf("TcpServer.evacuate() - Gently shutting down server error occurred: %v", err)
-			server.logger.Warnf("TcpServer.evacuate() - Try brute-force server close ...")
+			server.logger.Errorf("TcpServer.Stop() - Gently shutting down server error occurred: %v", err)
+			server.logger.Warnf("TcpServer.Stop() - Try brute-force server close ...")
 			server.activeRequests = 0
 		}
 		server.tcpListener = nil
@@ -294,8 +298,6 @@ func NewTcpServer(appName string, verbosity log.LogLevel) model.TcpServer {
 	return &tcpServer{
 		config: nil,
 		running: false,
-		internal: make(chan Signal),
-		commands: make(chan Signal),
 		logger: log.NewLogger(appName, verbosity),
 		handlers: make([]*model.TcpCallHandler, 0),
 		tcpListener: nil,

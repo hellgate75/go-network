@@ -10,18 +10,18 @@ import (
 
 // Describes an API Server most features
 type ApiServer interface {
-	// Create server configuration, and setup the network properties.
+	// Creates server configuration, and setup the network properties.
 	// It raises exception if the server is already running.
 	Init(config ServerConfig) (ApiServer, error)
-	// Start API Server and serve requests
+	// Starts API Server and serve requests
 	Start() error
-	// Stop API Server and stop requests
+	// Stops API Server and stop requests
 	Stop() error
-	// Verify API Server is running
+	// Verifies API Server is running
 	Running() bool
-	// Verify API Server is running
+	// Verifies API Server is running
 	Working() bool
-	// Wait for API server is down
+	// Waits for API server is down
 	Wait()
 	// Add a new path call handler in the api router, allowing management of multiple
 	// mime types and methods calls for the same path requested by the client
@@ -32,13 +32,13 @@ type ApiServer interface {
 
 // Describes an API Client most features
 type ApiClient interface {
-	// Configure a new Connection using server base path
+	// Configures a new Connection using server base path
 	Connect(config ClientConfig) error
-	// Make a call
-	// Request must be sent to the body Reader (preferred: bytes.Buffer)
+	// Makes a call
+	// Requests must be sent to the body Reader (preferred: bytes.Buffer)
 	Call(path string, method string, contentType *encoding.MimeType, accepts *encoding.MimeType, body io.Reader) (*http.Response, error)
-	// Make a call
-	// Request must be sent and object with preferred encoding configuration
+	// Makes a call
+	// Requests must be sent and object with preferred encoding configuration
 	Encode(path string, method string, contentType encoding.MimeType, accepts *encoding.MimeType, request interface{}, response interface{}) error
 }
 

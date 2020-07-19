@@ -8,7 +8,6 @@ import (
 	"github.com/hellgate75/go-network/model/encoding"
 	"github.com/hellgate75/go-network/tcp"
 	"github.com/hellgate75/go-network/tcp/builders"
-	log2 "log"
 	"time"
 )
 
@@ -23,12 +22,12 @@ func TestTcpServer() {
 		WithHost("", 9998).
 		Build()
 	if err != nil {
-		log2.Fatal(err)
+		panic(err)
 	}
 	logger.Infof("Server Config Encoding: %v", serverConfig.Encoding)
 	tcpServer, err = tcpServer.Init(serverConfig)
 	if err != nil {
-		log2.Fatal(err)
+		panic(err)
 	}
 	handler, _ := builders.NewTcpCallHandlerBuilder().
 		WithName("Main").
@@ -61,11 +60,11 @@ func TestTcpServer() {
 		Build()
 	err = tcpServer.AddPath(handler)
 	if err != nil {
-		log2.Fatal(err)
+		panic(err)
 	}
 	err = tcpServer.Start()
 	if err != nil {
-		log2.Fatal(err)
+		panic(err)
 	}
 	tcpServer.Wait()
 }
@@ -79,12 +78,12 @@ func TestTcpClient() {
 		WithEncoding(encoding.EncodingJSONFormat).
 		Build()
 	if err != nil {
-		log2.Fatal(err)
+		panic(err)
 	}
 	logger.Info("Connecting server ...")
 	err = tcpClient.Connect(tcpClientConfig)
 	if err != nil {
-		log2.Fatal(err)
+		panic(err)
 	}
 	defer func() {
 		logger.Info("Closing connection ...")

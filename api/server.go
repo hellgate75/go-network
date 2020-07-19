@@ -62,6 +62,8 @@ func (server *apiServer) Start() error {
 		server.logger.Fatal("ApiServer.Start() - Error: No server configuration provided")
 		return errors.New(fmt.Sprint("ApiServer.Start() - Error: No server configuration provided"))
 	}
+	server.internal = make(chan Signal)
+	server.commands = make(chan Signal)
 	var address = fmt.Sprintf("%s:%v", server.config.Host, server.config.Port)
 	server.httpServer = &http.Server{
 		Addr: address,
@@ -163,7 +165,9 @@ func (server *apiServer) shutdownTimer() {
 
 func (server *apiServer) evacuate() {
 	close(server.internal)
+	server.internal = nil
 	close(server.commands)
+	server.commands = nil
 }
 
 func (server *apiServer) Working() bool {
@@ -228,8 +232,6 @@ func NewApiServer(appName string, verbosity log.LogLevel) model.ApiServer {
 		config: nil,
 		running: false,
 		router: mux.NewRouter(),
-		internal: make(chan Signal),
-		commands: make(chan Signal),
 		logger: log.NewLogger(appName, verbosity),
 		handlers: make(map[string]*model.ApiCallHandler),
 		httpServer: nil,

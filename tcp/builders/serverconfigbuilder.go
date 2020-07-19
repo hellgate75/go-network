@@ -10,7 +10,7 @@ import (
 	"io/ioutil"
 )
 
-// Helper for building a model.ServerConfig instance
+// Helper for building a model.TcpServerConfig instance
 type TcpServerConfigBuilder interface {
 	// Use Tls encryption over standard plain communication protocol
 	UseTlsEncryption(use bool) TcpServerConfigBuilder

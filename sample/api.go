@@ -11,7 +11,6 @@ import (
 	"github.com/hellgate75/go-network/model/context"
 	"github.com/hellgate75/go-network/model/encoding"
 	"io/ioutil"
-	log2 "log"
 	"net/http"
 )
 
@@ -47,11 +46,11 @@ func TestApiServer() {
 		WithHost("", 9999).
 		Build()
 	if err != nil {
-		log2.Fatal(err)
+		panic(err)
 	}
 	apiServer, err = apiServer.Init(serverConfig)
 	if err != nil {
-		log2.Fatal(err)
+		panic(err)
 	}
 	handler, _ := builders.NewApiCallHandlerBuilder().
 		WithPath("/").
@@ -74,11 +73,11 @@ func TestApiServer() {
 		Build()
 	err = apiServer.AddPath(handler)
 	if err != nil {
-		log2.Fatal(err)
+		panic(err)
 	}
 	err = apiServer.Start()
 	if err != nil {
-		log2.Fatal(err)
+		panic(err)
 	}
 	apiServer.Wait()
 }
@@ -90,16 +89,16 @@ func TestApiClient() {
 		WithHost("http", "localhost", 9999).
 		Build()
 	if err != nil {
-		log2.Fatal(err)
+		panic(err)
 	}
 	err = apiClient.Connect(apiClientConfig)
 	if err != nil {
-		log2.Fatal(err)
+		panic(err)
 	}
 	empty := emptyStruct()
 	b, err := io.Marshal(encoding.EncodingJSONFormat, sampleStruct())
 	if err != nil {
-		log2.Fatal(err)
+		panic(err)
 	}
 	reader := bytes.NewBuffer(b)
 	mime := encoding.JsonMimeType

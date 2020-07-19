@@ -9,18 +9,18 @@ import (
 
 // Describes an Tcp Server most features
 type TcpServer interface {
-	// Create server configuration, and setup the network properties.
+	// Creates server configuration, and setup the network properties.
 	// It raises exception if the server is already running.
 	Init(config TcpServerConfig) (TcpServer, error)
-	// Start API Server and serve requests
+	// Starts Tcp Server and serve requests
 	Start() error
-	// Stop API Server and stop requests
+	// Stops Tcp Server and stop requests
 	Stop() error
-	// Verify API Server is running
+	// Verifies Tcp Server is running
 	Running() bool
-	// Verify API Server is running
+	// Verifies Tcp Server is running
 	Working() bool
-	// Wait for API server is down
+	// Waits for Tcp server is down
 	Wait()
 	// Add a new path call handler in the api router, allowing management of multiple
 	// mime types and methods calls for the same path requested by the client
@@ -53,11 +53,11 @@ type TcpClientConfig struct {
 	Network		string
 	// Host name or ip address (eg. my-host.acme.com or 192.168.1.222)
 	Host 		string
-	// Remote API Server Port
+	// Remote Tcp Server Port
 	Port 		int
-	// Remote API Server connection timeout (0 means not set)
+	// Remote Tcp Server connection timeout (0 means not set)
 	Timeout		time.Duration
-	// Remote API Server Security Configuration
+	// Remote Tcp Server Security Configuration
 	Config 		*tls.Config
 	// Encoding
 	Encoding		encoding.Encoding
@@ -70,9 +70,9 @@ type TcpServerConfig struct {
 	Network		string
 	// Host name or ip address (eg. my-host.acme.com or 127,0,0,1 or empty or 0.0.0.0)
 	Host 		string
-	// API Server Port
+	// Tcp Server Port
 	Port 		int
-	// API Server Security Configuration
+	// Tcp Server Security Configuration
 	Config 		*tls.Config
 	// Encoding
 	Encoding		encoding.Encoding
