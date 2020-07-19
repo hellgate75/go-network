@@ -18,20 +18,34 @@ Go Network Library
 This library contains following modules.
 
 Packages:
-* [Api library](/api) - Api server and client library
+* [Api library](/api) - Api Rest server and client library
+* [Tcp library](/tcp) - Tcp server and client library
 
 
 ### Api library
 
-This module manages the API Server and client.
+This module manages the API Rest Server and client.
 
-* [Model](/model/api.go) - Api Server and Client model
-* [Server](/api/server.go) - Api Server Implementation
-* [Client](/api/client.go) - Api Client Implementation
+* [Model](/model/api.go) - Api Rest Server and Client model
+* [Server](/api/server.go) - Api Rest Server Implementation
+* [Client](/api/client.go) - Api Rest Client Implementation
 * [ApiActionBuilder](/api/builders/apiactionbuilder.go) - ApiAction Builder Component
 * [ApiCallHandlerBuilder](/api/builders/apicallhandlerbuilder.go) - ApiCallHandler Builder Component
 * [ClientConfigBuilder](/api/builders/clientconfigbuilder.go) - ClientConfig Builder Component
 * [ServerConfigBuilder](/api/builders/serverconfigbuilder.go) - ServerConfig Builder Component
+
+
+### Tcp library
+
+This module manages the Tcp Server and client.
+
+* [Model](/model/tcp.go) - Tcp Server and Client model
+* [Server](/tcp/server.go) - Tcp Server Implementation
+* [Client](/tcp/client.go) - Tcp Client Implementation
+* [ApiActionBuilder](/tcp/builders/tcpactionbuilder.go) - TcpAction Builder Component
+* [ApiCallHandlerBuilder](/tcp/builders/tcpcallhandlerbuilder.go) - TcpCallHandler Builder Component
+* [ClientConfigBuilder](/tcp/builders/clientconfigbuilder.go) - TcpClientConfig Builder Component
+* [ServerConfigBuilder](/tcp/builders/serverconfigbuilder.go) - TcpServerConfig Builder Component
 
 
 ## DevOps

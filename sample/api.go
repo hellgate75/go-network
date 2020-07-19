@@ -41,7 +41,7 @@ func emptyStruct() interface{} {
 
 
 func TestApiServer() {
-	apiServer := api.NewApiServer("Sample API", log.DEBUG)
+	apiServer := api.NewApiServer("Sample Api Rest Server", log.DEBUG)
 	serverConfig, err := builders.
 		NewServerConfigBuilder().
 		WithHost("", 9999).
@@ -84,7 +84,8 @@ func TestApiServer() {
 }
 
 func TestApiClient() {
-	apiClient := api.NewApiClient()
+	logger := log.NewLogger("Sample Api Rest Server", log.DEBUG)
+	apiClient := api.NewApiClient("Sample Api Rest Server", log.DEBUG)
 	apiClientConfig, err := builders.NewClientConfigBuilder().
 		WithHost("http", "localhost", 9999).
 		Build()
@@ -102,10 +103,11 @@ func TestApiClient() {
 	}
 	reader := bytes.NewBuffer(b)
 	mime := encoding.JsonMimeType
+	logger.Infof("Request: %s", string(b))
 	resp, err := apiClient.Call("/", http.MethodPost, &mime, &mime, reader)
-	fmt.Printf("Status: %s\n", resp.Status)
+	logger.Infof("Status: %s", resp.Status)
 	bts, _ := ioutil.ReadAll(resp.Body)
-	fmt.Println("Response:", resp)
+	logger.Infof("Response: %+v", resp)
 	_ = io.Unmarshal(bts, encoding.EncodingJSONFormat, &empty)
-	fmt.Printf("Response data: %+v\n", empty)
+	logger.Infof("Response data: %+v", empty)
 }

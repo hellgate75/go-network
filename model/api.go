@@ -37,6 +37,9 @@ type ApiClient interface {
 	// Make a call
 	// Request must be sent to the body Reader (preferred: bytes.Buffer)
 	Call(path string, method string, contentType *encoding.MimeType, accepts *encoding.MimeType, body io.Reader) (*http.Response, error)
+	// Make a call
+	// Request must be sent and object with preferred encoding configuration
+	Encode(path string, method string, contentType encoding.MimeType, accepts *encoding.MimeType, request interface{}, response interface{}) error
 }
 
 // Describe client connection properties

@@ -14,8 +14,8 @@ import (
 
 
 func TestTcpServer() {
-	logger := log.NewLogger("Sample Tcp", log.DEBUG)
-	tcpServer := tcp.NewTcpServer("Sample TCP", log.DEBUG)
+	logger := log.NewLogger("Sample Tcp Server", log.DEBUG)
+	tcpServer := tcp.NewTcpServer("Sample Tcp Server", log.DEBUG)
 	serverConfig, err := builders.
 		NewTcpServerConfigBuilder().
 		WithNetwork("tcp").
@@ -71,8 +71,8 @@ func TestTcpServer() {
 }
 
 func TestTcpClient() {
-	logger := log.NewLogger("Client Tcp", log.DEBUG)
-	tcpClient := tcp.NewTcpClient("Client Tcp", log.DEBUG)
+	logger := log.NewLogger("Sample Tcp Client", log.DEBUG)
+	tcpClient := tcp.NewTcpClient("Sample Tcp Client", log.DEBUG)
 	tcpClientConfig, err := builders.NewTcpClientConfigBuilder().
 		WithHost("localhost", 9998).
 		WithNetwork("tcp").

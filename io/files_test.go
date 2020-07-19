@@ -3,7 +3,7 @@ package io
 import (
 	"crypto/rand"
 	"fmt"
-	"github.com/hellgate75/go-peer-nodes/testsuite"
+	"github.com/hellgate75/go-network/testsuite"
 	"io/ioutil"
 	"os"
 	"testing"
